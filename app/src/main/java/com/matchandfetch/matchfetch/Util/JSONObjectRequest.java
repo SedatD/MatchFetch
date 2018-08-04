@@ -1,0 +1,80 @@
+package com.matchandfetch.matchfetch.Util;
+
+import android.support.annotation.Nullable;
+import android.util.Log;
+
+import com.android.volley.AuthFailureError;
+import com.android.volley.NetworkResponse;
+import com.android.volley.Response;
+import com.android.volley.ServerError;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.HttpHeaderParser;
+import com.android.volley.toolbox.JsonObjectRequest;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.UnsupportedEncodingException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * Created by SD
+ * on 25.07.2018.
+ */
+
+public class JSONObjectRequest extends JsonObjectRequest {
+
+    private static final String TAG = "JSONObjectRequest ";
+    private JSONObject _params;
+    private Map<String, String> _headers;
+
+    public JSONObjectRequest(String url, @Nullable JSONObject params, Response.Listener<JSONObject> listener, @Nullable Response.ErrorListener errorListener, @Nullable Map<String, String> headers) {
+        super(url, params, listener, errorListener);
+        _params = params;
+        _headers = headers;
+        Log.wtf(TAG, "_params : " + _params);
+    }
+
+    @Override
+    public Map<String, String> getHeaders() throws AuthFailureError {
+        _headers = super.getHeaders();
+
+        if (_headers == null || _headers.equals(Collections.emptyMap())) {
+            _headers = new HashMap<String, String>();
+        }
+
+        _headers.put("Content-Type", "application/json");
+
+        Log.wtf(TAG, "getHeaders : " + _headers);
+
+        return _headers;
+    }
+
+    @Override
+    protected VolleyError parseNetworkError(VolleyError volleyError) {
+        Log.wtf(TAG, "parseNetworkError volleyError : " + volleyError + " / volleyError.getMessage() : " + volleyError.getMessage());
+
+        NetworkResponse response = volleyError.networkResponse;
+        if (volleyError instanceof ServerError && response != null) {
+            try {
+                String res = new String(response.data, HttpHeaderParser.parseCharset(response.headers, "utf-8"));
+                Log.wtf(TAG, "parseNetworkError res : " + res + " / response : " + response);
+                JSONObject obj = new JSONObject(res);
+                Log.wtf(TAG, "parseNetworkError obj : " + obj);
+            } catch (UnsupportedEncodingException | JSONException e1) {
+                e1.printStackTrace();
+            }
+        }
+
+        volleyError.printStackTrace();
+        return volleyError;
+    }
+
+    @Override
+    public String getBodyContentType() {
+        return "application/json; charset=UTF-8";
+    }
+
+}
