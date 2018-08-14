@@ -31,9 +31,11 @@ import android.widget.TextView;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.matchandfetch.matchfetch.Pojo.User;
 import com.matchandfetch.matchfetch.R;
-import com.matchandfetch.matchfetch.Util.JSONObjectRequest;
+import com.matchandfetch.matchfetch.AqRequest.AqJSONObjectRequest;
 import com.matchandfetch.matchfetch.Util.MyApplication;
+import com.onesignal.OneSignal;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -54,6 +56,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
+    private String osi;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,52 +88,41 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+
+        osi = OneSignal.getPermissionSubscriptionState().getSubscriptionStatus().getUserId();
+
+        String loginResponse = MyApplication.get().getPreferences().getString("loginResponse", null);
+        if (loginResponse != null) {
+            try {
+                JSONObject jsonObject = new JSONObject(loginResponse);
+                User user = new User(jsonObject,true);
+                requestJson(user.getEmail(), user.getPassword(), osi);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
     }
 
-    private void requestJson() {
+    private void requestJson(String email, String password, String osi) {
         JSONObject params = new JSONObject();
         try {
-            params.put("email", mEmailView.getText().toString().trim());
-            params.put("password", mPasswordView.getText().toString().trim());
+            params.put("email", email);
+            params.put("password", password);
             params.put("hash", HASH);
-            params.put("osi", "123456");
+            params.put("osi", osi);
 
             Response.Listener<JSONObject> listener = new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject response) {
                     Log.wtf(TAG, "onResponse : " + response);
-                    try {
-                        /*response.getInt("userID");
-                        response.getString("name");
-                        response.getString("sirname");
-                        response.getString("email");
-                        response.getString("password");
-                        response.getString("phoneNumber");
-                        response.getString("age");
-                        response.getInt("gender");
-                        response.getString("image");*/
 
-                        SharedPreferences.Editor editor = MyApplication.get().getPreferencesEditor();
-                        editor.putInt("userID", response.getInt("userID"));
-                        editor.putString("name", response.getString("name"));
-                        editor.putString("sirname", response.getString("sirname"));
-                        editor.putString("email", response.getString("email"));
-                        editor.putString("password", response.getString("password"));
-                        editor.putString("phoneNumber", response.getString("phoneNumber"));
-                        editor.putString("age", response.getString("age"));
-                        editor.putInt("gender", response.getInt("gender"));
-                        editor.putString("image", response.getString("image"));
+                    SharedPreferences.Editor editor = MyApplication.get().getPreferencesEditor();
+                    editor.putString("loginResponse", response + "");
+                    editor.apply();
 
-                        editor.putString("loginResponse", response + "");
-                        editor.apply();
-
-                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                        intent.putExtra("userID", response.getInt("userID"));
-                        startActivity(intent);
-                    } catch (JSONException e) {
-                        Log.wtf(TAG, "response catch e : " + e + "catch e.getMessage()" + e.getMessage());
-                        e.printStackTrace();
-                    }
+                    finish();
+                    startActivity(new Intent(LoginActivity.this, MainActivity.class));
                 }
             };
 
@@ -141,10 +133,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 }
             };
 
-            JSONObjectRequest jsonObjectRequest = new JSONObjectRequest(BASE_URL + "userLogin.php", params, listener, errorListener, null);
-            MyApplication.get().getRequestQueue().add(jsonObjectRequest);
+            AqJSONObjectRequest aqJSONObjectRequest = new AqJSONObjectRequest(TAG,BASE_URL + "userLogin.php", params, listener, errorListener);
+            MyApplication.get().getRequestQueue().add(aqJSONObjectRequest);
         } catch (JSONException e) {
-            Log.wtf(TAG, "params catch e : " + e + "catch e.getMessage()" + e.getMessage());
+            Log.wtf(TAG, "request params catch e.getMessage() : " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -229,7 +221,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             showProgress(true);
             //mAuthTask = new UserLoginTask(email, password);
             //mAuthTask.execute((Void) null);
-            requestJson();
+            requestJson(email, password, osi);
         }
     }
 

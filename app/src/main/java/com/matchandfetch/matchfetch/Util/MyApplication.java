@@ -6,6 +6,8 @@ import android.preference.PreferenceManager;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
+import com.google.firebase.analytics.FirebaseAnalytics;
+import com.onesignal.OneSignal;
 
 /**
  * Created by SD
@@ -25,6 +27,14 @@ public class MyApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        FirebaseAnalytics.getInstance(this);
+
+        OneSignal.startInit(this)
+                .inFocusDisplaying(OneSignal.OSInFocusDisplayOption.Notification)
+                .unsubscribeWhenNotificationsAreDisabled(true)
+                .init();
+
         _instance = this;
         _preferences = PreferenceManager.getDefaultSharedPreferences(this);
         _requestQueue = Volley.newRequestQueue(this);

@@ -3,10 +3,11 @@ package com.matchandfetch.matchfetch.Adapter;
 import android.content.Context;
 import android.util.Log;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.matchandfetch.matchfetch.Pojo.Profile;
+import com.matchandfetch.matchfetch.Pojo.User;
 import com.matchandfetch.matchfetch.R;
 import com.mindorks.placeholderview.SwipePlaceHolderView;
 import com.mindorks.placeholderview.annotations.Layout;
@@ -37,46 +38,76 @@ public class MFCard {
     @View(R.id.locationNameTxt)
     private TextView locationNameTxt;
 
-    private Profile mProfile;
+    @View(R.id.linearLayout)
+    private LinearLayout linearLayout;
+
+    //private Profile mProfile;
     private Context mContext;
     private SwipePlaceHolderView mSwipeView;
 
-    public MFCard(Context context, Profile profile, SwipePlaceHolderView swipeView) {
+    private User mUser;
+
+    private int measure;
+
+    /*public MFCard(Context context, Profile profile, SwipePlaceHolderView swipeView) {
         mContext = context;
         mProfile = profile;
+        mSwipeView = swipeView;
+    }*/
+
+
+    public MFCard(Context context, User user, SwipePlaceHolderView swipeView) {
+        mContext = context;
+        mUser = user;
         mSwipeView = swipeView;
     }
 
     @Resolve
-    private void onResolved(){
-        Glide.with(mContext).load(mProfile.getImageUrl()).into(profileImageView);
-        nameAgeTxt.setText(mProfile.getName() + ", " + mProfile.getAge());
-        locationNameTxt.setText(mProfile.getLocation());
+    private void onResolved() {
+        /*linearLayout.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                linearLayout.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+
+                measure = (linearLayout.getWidth() - MyUtils.dpToPx(40));
+                measure = (measure / 5);
+
+                linearLayout.requestLayout();
+            }
+        });
+
+        MyUtils.setMeasures(profileImageView, measure);*/
+
+        Glide.with(mContext).load("http://sedatdilmac.com/img/profile.jpg").into(profileImageView);
+        nameAgeTxt.setText(mUser.getName() + ", " + mUser.getAge());
+        locationNameTxt.setText("location");
     }
 
     @SwipeOut
-    private void onSwipedOut(){
-        Log.wtf(TAG, "onSwipedOut");
+    private void onSwipedOut() {
+        //Log.wtf(TAG, "onSwipedOut");
         mSwipeView.addView(this);
     }
 
     @SwipeCancelState
-    private void onSwipeCancelState(){
-        Log.wtf(TAG, "onSwipeCancelState");
+    private void onSwipeCancelState() {
+        //Log.wtf(TAG, "onSwipeCancelState");
+        Log.wtf(TAG, "onSwipeCancelState this.mUser.getUserID() : " + this.mUser.getUserID());
     }
 
     @SwipeIn
-    private void onSwipeIn(){
-        Log.wtf(TAG, "onSwipedIn");
+    private void onSwipeIn() {
+        //Log.wtf(TAG, "onSwipedIn");
     }
 
     @SwipeInState
-    private void onSwipeInState(){
-        Log.wtf(TAG, "onSwipeInState");
+    private void onSwipeInState() {
+        //Log.wtf(TAG, "onSwipeInState");
     }
 
     @SwipeOutState
-    private void onSwipeOutState(){
-        Log.wtf(TAG, "onSwipeOutState");
+    private void onSwipeOutState() {
+        //Log.wtf(TAG, "onSwipeOutState");
     }
+
 }

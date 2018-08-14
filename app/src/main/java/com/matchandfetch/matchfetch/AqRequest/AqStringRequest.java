@@ -1,4 +1,4 @@
-package com.matchandfetch.matchfetch.Util;
+package com.matchandfetch.matchfetch.AqRequest;
 
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -9,7 +9,7 @@ import com.android.volley.Response;
 import com.android.volley.ServerError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.HttpHeaderParser;
-import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -24,22 +24,27 @@ import java.util.Map;
  * on 25.07.2018.
  */
 
-public class JSONObjectRequest extends JsonObjectRequest {
+public class AqStringRequest extends StringRequest {
 
-    private static final String TAG = "JSONObjectRequest ";
-    private JSONObject _params;
-    private Map<String, String> _headers;
+    private static final String TAG = "AqStringRequest ";
+    private Map<String, String> _params;
 
-    public JSONObjectRequest(String url, @Nullable JSONObject params, Response.Listener<JSONObject> listener, @Nullable Response.ErrorListener errorListener, @Nullable Map<String, String> headers) {
-        super(url, params, listener, errorListener);
+    public AqStringRequest(String TAG, String url, @Nullable Map<String, String> params, Response.Listener<String> listener, @Nullable Response.ErrorListener errorListener) {
+        super(Method.POST, url, listener, errorListener);
+
+        Log.wtf(TAG, "params : " + params);
+
         _params = params;
-        _headers = headers;
-        Log.wtf(TAG, "_params : " + _params);
+    }
+
+    @Override
+    protected Map<String, String> getParams() throws AuthFailureError {
+        return _params;
     }
 
     @Override
     public Map<String, String> getHeaders() throws AuthFailureError {
-        _headers = super.getHeaders();
+        Map<String, String> _headers = super.getHeaders();
 
         if (_headers == null || _headers.equals(Collections.emptyMap())) {
             _headers = new HashMap<String, String>();
